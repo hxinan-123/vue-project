@@ -3,8 +3,12 @@
     <!--最外层容器-->
     <nav>
       <!--容器上半部分-->
-      <div class="nav-group">
-        <!--移动端的菜单图标-->
+      <div
+        class="nav-group"
+        @click="$store.dispatch('updateMenu')"
+        v-show="!isUpdate"
+      >
+        <!-- 在菜单的图标下面添加updateMenu时间，他可以直接调用vuex actions.js里面的updateMenu方法 -->
         <a class="nav-item">
           <span class="icon-list-unordered"> </span>
         </a>
@@ -37,21 +41,21 @@
           v-model="text"
           placeholder="请输入"
           :disabled="todo.locked"
+          @keyup.enter="onAdd"
         />
         <span class="icon-add"></span>
       </div>
     </nav>
     <div class="content-scrollable list-items">
       <!--容器下半部分-->
-      <!-- <div v-for="item in items" :key="item.text">
+      <div v-for="item in items" :key="item.text">
         <item :item="item"></item>
-      </div> -->
-      <item></item>
+      </div>
     </div>
   </div>
 </template>
 <script>
-import { getTodo } from "../api/api";
+import { addRecord, getTodo } from "../api/api";
 import item from "./item.vue";
 export default {
   data() {
@@ -75,24 +79,22 @@ export default {
       }
     }
   },
-  created() {
-    this.init();
-  },
+  // created() {
+  //   this.init();
+  // },
   components: {
     item
   },
   methods: {
     onAdd() {
-      this.items.push({
-        checked: false,
-        text: this.text,
-        isDelete: false
-      }); // 当用户点击回车时候 ，给items的值新增一个对象，this.text 即输入框绑定的值
-      this.text = ""; //初始化输入框的值。
+      const ID = this.$route.params.id;
+      addRecord({ id: ID, text: this.text }).then(res => {
+        this.text = "";
+        this.init();
+      });
     },
 
     init() {
-      console.log(this.$route);
       const ID = this.$route.params.id;
       getTodo({ id: ID }).then(res => {
         let { id, title, count, isDelete, locked, record } = res.data.todo;
@@ -101,8 +103,8 @@ export default {
           id: id,
           title: title,
           count: count,
-          isDelete: isDelete,
-          locked: locked
+          locked: locked,
+          isDelete: isDelete
         };
       });
     }

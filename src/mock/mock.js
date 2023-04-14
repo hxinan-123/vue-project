@@ -22,7 +22,6 @@ export default {
         if (tode.isDelete === true) return false;
         return true;
       });
-      console.log(mockTodo[0].id);
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           resolve([
@@ -51,15 +50,15 @@ export default {
     });
 
     mock.onGet("/todo/listId").reply(config => {
-      console.log(config);
       let { id } = config.params;
       let todo = Todos.find(todo => {
         return id && todo.id === id;
       });
-      console.log(id);
-      console.log(Todos);
-      console.log(todo);
-      todo.count = todo.record.filter(data => data.checked === false).length;
+      todo
+        ? (todo.count = todo.record.filter(data => {
+            return data.checked === false;
+          }).length)
+        : console.log("wrong");
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           resolve([200, { todo: todo }]);
@@ -68,7 +67,6 @@ export default {
     });
 
     mock.onPost("/todo/addRecord").reply(config => {
-      console.log(config.data);
       let { id, text } = JSON.parse(config.data);
       Todos.map(t => {
         if (t.id === id) {
